@@ -1,0 +1,7 @@
+anthropic>=0.40
+numpy
+matplotlib
+scikit-learn
+tqdm
+sentence-transformers   # nếu dùng embed_backend="st"
+umap-learn              # optional, fallback sang PCA

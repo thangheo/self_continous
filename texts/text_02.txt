@@ -1,0 +1,32 @@
+# Linear Algebra for Deep Learning
+
+If you had to choose one area of mathematics to understand deep learning, it would be linear algebra.
+
+Calculus explains how neural networks learn. Probability describes uncertainty and loss. Optimization determines how parameters are updated. Linear algebra describes what the network actually does: a sequence of transformations that mix representations, followed by pointwise nonlinearities.
+
+At the core are a few concepts: **vectors, vector spaces, basis, dimension, inner products, linear transformations, matrices, and matrix multiplication**.
+
+A vector is not fundamentally an arrow or an array of numbers. It is an element of a vector space. In deep learning, embeddings, activations, gradients, signals, and model parameters can all be treated as vectors.
+
+A **basis** defines how vectors are represented. Coordinates depend on the basis; the underlying vector does not. This perspective explains why the DFT can be understood as a change of basis, and why representations learned by different models cannot necessarily be compared coordinate-by-coordinate.
+
+**Dimension** is the number of independent degrees of freedom available to represent something. Embedding size, hidden size, and latent size are all manifestations of this idea. Dimension is a representational budget: more capacity generally means more memory and computation.
+
+A vector space alone does not tell us what “distance,” “angle,” or “orthogonality” means. An **inner product** adds that geometry. From it we obtain norms, cosine similarity, orthogonality, and projection. These concepts appear directly in speaker embeddings, SI-SDR, beamforming, and many optimization methods.
+
+A **linear transformation** preserves linear combinations. A matrix is simply the coordinate representation of such a transformation after choosing bases. This is why it is more useful to think of a matrix as an operation rather than a table of numbers.
+
+**Matrix multiplication is composition.**
+Applying \(B\) after \(A\) gives \(BA\). This explains non-commutativity, shape constraints, and why changing the order of operations can radically change computational cost.
+
+This viewpoint unifies much of modern AI.
+
+A neural layer is essentially a linear or affine transformation plus a nonlinearity. Convolution can be viewed as a structured matrix operation. Attention consists largely of learned linear projections and inner products. STFT is a change into the Fourier basis. Mel filtering is another linear transformation. Beamforming operates through covariance matrices, projections, and subspaces. Quantized inference is largely matrix multiplication performed with lower-precision arithmetic.
+
+The practical lesson is simple: **stop treating linear algebra as a collection of formulas to memorize. Treat it as the language for reading models, code, and papers.**
+
+When you see `nn.Linear`, attention, a covariance matrix, an embedding, or a shape mismatch, ask the same questions:
+
+**What space am I in? What basis am I using? What transformation is being applied? What information is preserved, compressed, or discarded?**
+
+Once those questions become intuitive, much of deep learning stops looking like a collection of unrelated tricks and starts looking like the same mathematical machinery in different forms.

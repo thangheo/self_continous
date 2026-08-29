@@ -1,0 +1,13 @@
+The product ships with caller-side enrollment: a user registers a voice profile
+before any call is placed. On the customer side, however, there is no equivalent
+enrollment step, and no identity is established for the party being called. The
+beacon subsystem coordinates multiple devices in the same room, deduplicating
+audio streams so that only one device transcribes at a time. This works, but it
+only ever coordinates devices that belong to the enrolled caller.
+
+Because there is no customer-side endpoint, the ecosystem has no closed loop:
+value accrues to the caller and never returns through the customer. Any network
+effect the product claims must therefore come from caller-to-caller referral,
+not from the two-sided interaction the marketing implies. If that is correct,
+the growth model is closer to a productivity tool than to a platform, and the
+valuation multiple should be set accordingly.

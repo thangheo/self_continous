@@ -1,0 +1,78 @@
+# When an LLM Doesn’t Understand the Customer but Still Designs the Product
+
+There is a failure mode in AI-assisted engineering that I find more dangerous than ordinary hallucination.
+
+An LLM does not have to invent an API.
+
+It can do something much worse:
+
+**build an entire product around a customer flow that was never proven to exist.**
+
+I recently worked on a highly ambitious voice project: microphone arrays, beamforming, Target Speaker Extraction (TSE), beacons, headsets, ultrasonic speakers, NPU acceleration, synchronization, and multi-station coordination.
+
+The specification was already at version 3. The architecture looked mature: protocols, interfaces, state machines, compute budgets, synchronization logic—the works.
+
+But when I traced the system backward from the customer, one basic question appeared:
+
+**Where does the customer’s voiceprint come from?**
+
+TSE needs a target representation: enrollment audio, a speaker embedding, reference audio, or some other conditioning signal. The system must know **whose voice it is trying to extract**.
+
+That is not an NPU problem. It is not a Qualcomm problem. It is a **product-flow problem**.
+
+The architecture may say:
+
+Microphone → Beamforming → TSE → Speaker Identification
+
+But the customer flow must answer:
+
+Who is the target?
+How does the system know?
+Where does the reference voice come from?
+When is it enrolled?
+How is it associated with the session?
+
+Without those answers, the algorithm may be correct while the product is fundamentally wrong.
+
+Then the architecture starts generating its own requirements.
+
+Voiceprints require sharing. Sharing leads to a beacon. The beacon needs a protocol. The protocol needs a coordinator. The coordinator needs a roster. The roster creates a “64 voices” requirement. That drives NPU scheduling, memory architecture, and compute budgets.
+
+Soon, every component becomes justification for another component.
+
+The system becomes internally coherent—but externally unvalidated.
+
+That is the dangerous part of LLM-assisted engineering.
+
+LLMs are very good at understanding components and dependencies. They are much worse at challenging whether the underlying customer reality exists.
+
+**System coherence is not product validity.**
+
+A useful rule is simple:
+
+Every feature must answer four questions:
+
+**Who needs it?
+When do they use it?
+What information does the system have at that moment?
+What measurable outcome proves it works?**
+
+And one more:
+
+**What assumption, if removed, would make this feature unnecessary?**
+
+LLMs can make specification generation dramatically cheaper.
+
+They do not make product validation cheaper by the same amount.
+
+So the real workflow should be:
+
+**Customer problem → User flow → System requirement → Constraints → Algorithm → Architecture**
+
+Not:
+
+**Technology → Feature → Architecture**
+
+The most dangerous AI failure is not writing the wrong function.
+
+It is helping us build, very efficiently, **a product that never existed in the first place.**

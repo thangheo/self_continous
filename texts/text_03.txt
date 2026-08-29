@@ -1,0 +1,45 @@
+# Zero-Copy in Embedded Systems: Moving Ownership, Not Data
+
+The previous article on inference pipeline architecture established a simple rule: **the data path should be designed to avoid unnecessary copies**. But that raises a more important question: if the payload does not move, what actually moves?
+
+The answer is **ownership**.
+
+Zero-copy is not simply “never call `memcpy()`.” It is an architectural principle where a payload stays in the same physical memory buffer while different stages, processes, or hardware accelerators receive access to it through handles, file descriptors, or buffer references.
+
+Five mechanisms make this possible.
+
+First, **memory mapping** allows multiple processes to access the same physical pages through different virtual addresses. A pointer therefore cannot safely cross a process boundary; the transferable object is a handle or file descriptor.
+
+Second, **DMA** allows peripherals such as ISPs, NPUs, codecs, and network controllers to access DRAM directly. A camera can write a frame into memory and an NPU can consume that same buffer without the CPU touching the payload.
+
+Third, **buffer sharing** connects hardware blocks directly. A typical path might be ISP → NPU → encoder, with the same physical buffer flowing through the entire pipeline.
+
+Fourth, the buffer must satisfy the physical requirements of every device involved: alignment, stride, contiguity, and memory-access constraints. IOMMUs can relax some of these requirements, but they cannot simply be assumed to exist.
+
+Finally, there is **ownership and lifetime management**. Once copying disappears, the buffer becomes a genuinely shared resource. The system must know exactly who can write, who can read, and when the buffer may be reused.
+
+This is also why “zero-copy” is often more accurately described as **fewer-copy**. Some conversions remain unavoidable. The goal is to make every remaining copy explicit and justified by the hardware architecture.
+
+Why does this matter?
+
+Because memory bandwidth is shared. A 1080p NV12 frame is roughly 3 MB. At 30 FPS, one full-frame copy already generates around 90 MB/s of memory traffic. Repeat that across several pipeline stages and the cost quickly approaches hundreds of MB/s. That bandwidth competes directly with the CPU, NPU, ISP, display, and other DMA engines.
+
+There is also an indirect cost: **cache pollution**. A large `memcpy()` can evict useful working sets from the CPU cache, causing unrelated code to become slower. In real-time systems, memory contention also creates jitter, making worst-case latency harder to control.
+
+But zero-copy introduces its own complexity, especially **cache coherency**.
+
+If the CPU writes data into a cached buffer and a DMA engine reads DRAM, the device may see stale data. Conversely, after DMA writes to DRAM, the CPU may still read an old cache line. Depending on the SoC, coherency may be hardware-managed, software-managed through cache clean/invalidate operations, or avoided using uncached buffers.
+
+None of these approaches is universally optimal.
+
+The same applies to buffer lifetime. A DMA submission returning does not necessarily mean the hardware has finished reading the buffer. The buffer must remain owned until an explicit completion event—such as a fence or interrupt—confirms that it can be recycled.
+
+The practical rule is therefore simple:
+
+**Zero-copy is not a religion. It is a per-buffer architectural decision based on access patterns, hardware constraints, bandwidth, and measurement.**
+
+Large, high-frequency payloads such as video frames, multichannel audio, and ADC blocks are strong candidates. Small metadata structures usually are not. And if the CPU needs to process every element of an uncached buffer, copying it once into cached memory may actually be faster.
+
+The objective is not to achieve zero copies at any cost.
+
+The objective is to ensure that **every memory movement that remains has a reason, a measurable cost, and a place in the system architecture.**
